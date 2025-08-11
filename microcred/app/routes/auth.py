@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
 from ..extensions import db
 from ..models import User, Role
-
+from ..config import Config
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @bp.route("/login", methods=["GET", "POST"])
@@ -10,7 +10,9 @@ def login():
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
+        print(f"{email}:{password}")
         user = User.query.filter_by(email=email).first()
+
         if user and user.check_password(password):
             login_user(user)
             return redirect(url_for("participants.my_awards"))

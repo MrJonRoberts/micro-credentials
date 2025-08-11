@@ -38,7 +38,7 @@
         {% if current_user.is_authenticated %}
           <li class="nav-item">
             <span class="navbar-text me-3">
-              <i class="fa-regular fa-user me-1"></i>{{ getattr(current_user, 'full_name', lambda: '')() or current_user.email }}
+<i class="fa-regular fa-user me-1"></i>{{ current_user.full_name or current_user.email }}
             </span>
           </li>
           <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.logout') }}">Logout</a></li>

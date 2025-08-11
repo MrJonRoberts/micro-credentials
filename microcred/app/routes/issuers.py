@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_login import current_user, login_required
 from ..extensions import db
 from ..models import Award, User, Achievement
 from ._utils import roles_required
 
-bp = Blueprint("issuers", __name__, url_prefix="/issuer")
+bp = Blueprint("issuers", __name__, url_prefix="/issuers")
 
 @bp.get("/awardable")
+@login_required
 @roles_required("issuer", "admin")
 def awardable_list():
     awards = Award.query.order_by(Award.points.desc(), Award.name.asc()).all()
@@ -16,29 +18,34 @@ def awardable_list():
     )
 
 @bp.post("/award")
+@login_required
 @roles_required("issuer", "admin")
 def award_post():
     try:
         participant_id = int(request.form["participant_id"])
         award_id = int(request.form["award_id"])
-    except Exception:
+    except (KeyError, ValueError):
         flash("Participant and award are required", "warning")
         return redirect(url_for("issuers.awardable_list"))
 
-    note = request.form.get("note") or ""
-
-    existing = Achievement.query.filter_by(participant_id=participant_id, award_id=award_id).first()
-    if existing:
+    if Achievement.query.filter_by(participant_id=participant_id, award_id=award_id).first():
         flash("Participant already has this award", "info")
         return redirect(url_for("issuers.awardable_list"))
 
-    ach = Achievement(participant_id=participant_id, award_id=award_id, issued_by_id=getattr(getattr(request, "user", None), "id", None), note=note)  # issued_by_id set in view below if using login
-    # If you use Flask-Login, swap issued_by_id above like:
-    # from flask_login import current_user
-    # ach.issued_by_id = current_user.id
-
+    ach = Achievement(
+        participant_id=participant_id,
+        award_id=award_id,
+        issued_by_id=current_user.id,
+        note=request.form.get("note", "")
+    )
     db.session.add(ach)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Could not grant award, please try again", "danger")
+        return redirect(url_for("issuers.awardable_list"))
+
     flash("Award granted", "success")
     return redirect(url_for("issuers.awardable_list"))
 

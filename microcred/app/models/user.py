@@ -13,7 +13,11 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64))
 
     roles = db.relationship("Role", secondary=user_roles, backref="users", lazy="joined")
-    achievements = db.relationship("Achievement", back_populates="participant", lazy="dynamic")
+    # Fix: Specify foreign_keys to resolve ambiguity
+    achievements = db.relationship("Achievement",
+                                 foreign_keys="Achievement.participant_id",
+                                 back_populates="participant",
+                                 lazy="dynamic")
 
     # --- Password helpers ---
     def set_password(self, password: str) -> None:
@@ -24,15 +28,17 @@ class User(UserMixin, db.Model):
             return False
         return check_password_hash(self.password_hash, password)
 
-    # --- Convenience ---
+    @property
     def full_name(self) -> str:
-        fn = (self.first_name or "").strip()
-        ln = (self.last_name or "").strip()
-        return f"{fn} {ln}".strip()
+        first = (self.first_name or "").strip()
+        last = (self.last_name or "").strip()
+        return " ".join(p for p in (first, last) if p)
 
     def has_role(self, *role_names: str) -> bool:
         names = {r.name for r in self.roles}
         return any(rn in names for rn in role_names)
+
+
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<User {self.email}>"

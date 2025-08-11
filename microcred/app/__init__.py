@@ -1,65 +1,39 @@
-# microcred/app/__init__.py
-import os
-from pathlib import Path
 from flask import Flask
+from pathlib import Path
+from .config import CONFIG_MAP, INSTANCE_DIR  # we'll export INSTANCE_DIR from config.py
+from .extensions import db, migrate, login_manager, csrf
 
-try:
-    from .extensions import db, migrate, login_manager, csrf
-except Exception as e:
-    raise RuntimeError("extensions.py must define db, migrate, login_manager, csrf") from e
-
-try:
-    from .config import Config  # type: ignore
-except Exception:
-    class Config:
-        SECRET_KEY = os.getenv("SECRET_KEY", "dev-change-me")
-        SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///microcred/instance/app.db")
-        SQLALCHEMY_TRACK_MODIFICATIONS = False
-        AWARD_IMAGE_BASE = os.getenv("AWARD_IMAGE_BASE", "/static/awards")
-        WTF_CSRF_ENABLED = True
-
-def create_app() -> Flask:
+def create_app(env_name: str | None = None) -> Flask:
+    """
+    Application factory: sets a fixed absolute instance_path so
+    the database and other instance files are always in <repo>/instance.
+    """
     app = Flask(
         __name__,
-        instance_relative_config=True,
-        static_folder="static",
-        template_folder="templates",
+        instance_path=str(INSTANCE_DIR),      # absolute path from config.py
+        instance_relative_config=True
     )
-    app.config.from_object(Config)
 
+    # Select config class from CONFIG_MAP based on env_name or Flask ENV
+    config_class = CONFIG_MAP.get(env_name or app.config.get("ENV", "development"))
+    app.config.from_object(config_class)
+
+    # Ensure the instance folder exists (belt-and-braces)
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
-    # Extensions
+    # Initialise extensions
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    login_manager.login_view = "auth.login"
-    csrf.init_app(app)  # <-- CSRF enabled globally (protects all POST/PUT/PATCH/DELETE)
+    csrf.init_app(app)
 
-    # Make csrf_token() available in Jinja (for plain HTML forms)
-    from flask_wtf.csrf import generate_csrf
-    @app.context_processor
-    def inject_csrf():
-        return {"csrf_token": lambda: generate_csrf()}
-
-    # Register blueprints if present
-    def _register(module_path: str):
-        try:
-            mod = __import__(module_path, fromlist=["bp"])
-            bp = getattr(mod, "bp", None)
-            if bp is not None:
-                app.register_blueprint(bp)
-        except Exception:
-            pass
-
-    _register("microcred.app.routes.auth")
-    _register("microcred.app.routes.participants")
-    _register("microcred.app.routes.issuers")
-    _register("microcred.app.routes.admin")
-    _register("microcred.app.routes.api")
-
-    @app.get("/")
-    def health():
-        return {"status": "ok", "app": "microcred"}
+    # Register blueprints
+    from .routes import auth, participants, issuers, admin, api, main
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(participants.bp)
+    app.register_blueprint(issuers.bp)
+    app.register_blueprint(admin.bp)
+    app.register_blueprint(api.bp)
+    app.register_blueprint(main.bp)
 
     return app
