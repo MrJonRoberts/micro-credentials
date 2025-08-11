@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Issuer · Issued awards{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <h1 class="h4 mb-0"><i class="fa-solid fa-list-check me-2"></i>Participants who have awards</h1>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Participant</th>
+        <th>Award</th>
+        <th>Points</th>
+        <th>Issued at</th>
+        <th>Issuer</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ach in achievements %}
+        <tr>
+          <td>{{ ach.participant.first_name }} {{ ach.participant.last_name }}</td>
+          <td class="fw-semibold">{{ ach.award.name }}</td>
+          <td>{{ ach.award.points }}</td>
+          <td>{{ ach.issued_at.strftime('%Y-%m-%d %H:%M') if ach.issued_at else '' }}</td>
+          <td>{% if ach.issued_by %}{{ ach.issued_by.first_name }} {{ ach.issued_by.last_name }}{% endif %}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="text-muted">No awards have been issued yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

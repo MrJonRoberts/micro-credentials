@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ ach.award.name }} · Micro‑Credentialling{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <div class="d-flex align-items-center mb-3">
+      {% if ach.award.image_filename %}
+        <img class="me-3" src="{{ img_base }}/{{ ach.award.image_filename }}" alt="{{ ach.award.name }}" style="width:80px;height:80px;object-fit:cover;border-radius:.5rem;">
+      {% endif %}
+      <div>
+        <h1 class="h4 mb-1">{{ ach.award.name }}</h1>
+        <div class="text-muted small">Points: <span class="badge text-bg-primary">{{ ach.award.points }}</span></div>
+      </div>
+    </div>
+    <p class="lead">{{ ach.award.description }}</p>
+    {% if ach.award.criteria %}
+      <div class="alert alert-info"><i class="fa-regular fa-lightbulb me-2"></i><strong>How to achieve:</strong> {{ ach.award.criteria }}</div>
+    {% endif %}
+  </div>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h6 text-uppercase text-muted">Awarded</h2>
+        <p class="mb-1"><i class="fa-regular fa-calendar-check me-2"></i>{{ ach.issued_at }}</p>
+        {% if ach.issued_by %}
+          <p class="mb-0"><i class="fa-regular fa-user me-2"></i>By {{ ach.issued_by.first_name }} {{ ach.issued_by.last_name }}</p>
+        {% endif %}
+        {% if ach.note %}
+          <hr><p class="mb-0"><em>Note:</em> {{ ach.note }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

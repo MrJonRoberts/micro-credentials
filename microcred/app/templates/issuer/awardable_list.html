@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Issuer · Awardable{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <h1 class="h4 mb-0"><i class="fa-solid fa-hand-holding-heart me-2"></i>Awards you can issue</h1>
+</div>
+
+<form class="card card-body shadow-sm mb-4" method="post" action="{{ url_for('issuers.award_post') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <!-- ...existing fields... -->
+
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Participant ID</label>
+      <input class="form-control" name="participant_id" required>
+      <div class="form-text">Paste or type the participant’s user ID.</div>
+    </div>
+    <div class="col-md-5">
+      <label class="form-label">Award</label>
+      <select class="form-select" name="award_id">
+        {% for a in awards %}
+          <option value="{{ a.id }}">{{ a.name }} ({{ a.points }} pts)</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Note (optional)</label>
+      <input class="form-control" name="note" placeholder="e.g. outstanding effort">
+    </div>
+  </div>
+  <div class="mt-3">
+    <button class="btn btn-success"><i class="fa-solid fa-check me-2"></i>Grant award</button>
+  </div>
+</form>
+
+<div class="row g-3">
+  {% for a in awards %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-body d-flex">
+          {% if a.image_filename %}
+            <img class="award-img me-3" src="{{ img_base }}/{{ a.image_filename }}" alt="{{ a.name }}">
+          {% else %}
+            <div class="award-img me-3 bg-secondary d-inline-flex align-items-center justify-content-center text-white">
+              <i class="fa-regular fa-image"></i>
+            </div>
+          {% endif %}
+          <div>
+            <div class="fw-semibold">{{ a.name }}</div>
+            <div class="small text-muted">{{ a.description }}</div>
+          </div>
+          <div class="ms-auto text-nowrap"><span class="badge text-bg-primary">{{ a.points }} pts</span></div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <p class="text-muted">No awards available to issue.</p>
+  {% endfor %}
+</div>
+{% endblock %}

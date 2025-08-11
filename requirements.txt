@@ -1,0 +1,17 @@
+# Flask core
+Flask==3.0.3
+
+# Database ORM + migrations
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+
+# User authentication
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+email-validator==2.2.0
+
+# Environment variable loader
+python-dotenv==1.0.1
+
+# For generating slugs from award names
+python-slugify==8.0.4
