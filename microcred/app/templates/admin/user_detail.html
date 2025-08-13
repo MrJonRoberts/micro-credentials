@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Admin · Manage {{ user.full_name or user.email }}{% endblock %}
+{% block content %}
+<a class="btn btn-link p-0 mb-2" href="{{ url_for('admin.user_list') }}">&larr; Back to users</a>
+<h1 class="h4 mb-3"><i class="fa-regular fa-user me-2"></i>{{ user.full_name or user.email }}</h1>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header">Profile & Roles</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="action" value="save_user">
+          {{ csrf_token() }}
+          <div class="mb-2">
+            <label class="form-label">First name</label>
+            <input class="form-control" name="first_name" value="{{ user.first_name or '' }}">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Last name</label>
+            <input class="form-control" name="last_name" value="{{ user.last_name or '' }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input class="form-control" name="email" value="{{ user.email }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Roles</label><br>
+            {% for role in Role.query.order_by(Role.name.asc()).all() %}
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="r-{{ role.id }}" name="roles" value="{{ role.name }}"
+                       {% if role in user.roles %}checked{% endif %}>
+                <label class="form-check-label" for="r-{{ role.id }}">{{ role.name }}</label>
+              </div>
+            {% endfor %}
+          </div>
+          <button class="btn btn-primary"><i class="fa-regular fa-floppy-disk me-1"></i>Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header">Grant award</div>
+      <div class="card-body">
+        <form method="post">
+          <input type="hidden" name="action" value="grant_award">
+          {{ csrf_token() }}
+          <div class="row g-2 align-items-end">
+            <div class="col-8">
+              <label class="form-label">Award</label>
+              <select class="form-select" name="award_id" required>
+                {% for a in awards_all %}
+                  <option value="{{ a.id }}">{{ a.name }} ({{ a.points }} pts)</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-4">
+              <label class="form-label">Note</label>
+              <input class="form-control" name="note" placeholder="(optional)">
+            </div>
+            <div class="col-12">
+              <button class="btn btn-success"><i class="fa-solid fa-check me-1"></i>Grant</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header">Current awards</div>
+      <div class="card-body">
+        {% if achievements %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr><th>Award</th><th>Issued</th><th>By</th><th></th></tr>
+              </thead>
+              <tbody>
+              {% for ach in achievements %}
+                <tr>
+                  <td>{{ ach.award.name }}</td>
+                  <td class="text-muted">{{ ach.issued_at.strftime("%Y-%m-%d %H:%M") }}</td>
+                  <td class="text-muted">{{ ach.issued_by.full_name or ach.issued_by.email if ach.issued_by else "—" }}</td>
+                  <td class="text-end">
+                    <form method="post" onsubmit="return confirm('Revoke this award?');">
+                      {{ csrf_token() }}
+                      <input type="hidden" name="action" value="revoke_award">
+                      <input type="hidden" name="achievement_id" value="{{ ach.id }}">
+                      <button class="btn btn-sm btn-outline-danger">
+                        <i class="fa-regular fa-trash-can me-1"></i>Revoke
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No awards yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

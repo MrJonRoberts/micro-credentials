@@ -1,0 +1,33 @@
+<div class="icon-grid" data-page="{{ page }}" data-pages="{{ pages }}">
+  {% for ic in icons %}
+    <button type="button"
+            class="icon-option btn btn-light p-1"
+            data-url="{{icon_url(ic.category, ic.filename)}}"
+            title="{{ ic.name }}"
+            style="border:1px solid #ddd;border-radius:.5rem">
+      <img src="{{icon_url(ic.category, ic.filename)}}" alt="{{ ic.name }}"
+           style="width:48px;height:48px;object-fit:contain;display:block">
+      <div class="small text-muted mt-1 text-truncate" style="max-width:64px">
+        {{ ic.name }}
+      </div>
+    </button>
+  {% endfor %}
+</div>
+
+{% if pages > 1 %}
+<div class="d-flex justify-content-between align-items-center mt-2">
+  <button class="btn btn-sm btn-outline-secondary icon-nav" data-dir="-1" {% if page <= 1 %}disabled{% endif %}>Prev</button>
+  <span class="small">Page {{ page }} / {{ pages }}</span>
+  <button class="btn btn-sm btn-outline-secondary icon-nav" data-dir="1" {% if page >= pages %}disabled{% endif %}>Next</button>
+</div>
+{% endif %}
+
+<style>
+  .icon-grid {
+    display:grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap:.5rem;
+    max-width: 300px;
+  }
+  .icon-option:focus { outline:2px solid #0d6efd; }
+</style>

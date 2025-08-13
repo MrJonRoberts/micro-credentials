@@ -1,0 +1,55 @@
+<!-- microcred/app/templates/admin/award_edit.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="h4 mb-3">Edit Award</h1>
+
+  <form method="post" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+
+    <div class="mb-3">
+      <label class="form-label">Name</label>
+      {{ form.name(class="form-control") }}
+      {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Slug</label>
+      {{ form.slug(class="form-control") }}
+      <div class="form-text">Used in filenames and URLs. Must be unique.</div>
+      {% for e in form.slug.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      {{ form.description(class="form-control", rows="3") }}
+      {% for e in form.description.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Points</label>
+      {{ form.points(class="form-control", min="0") }}
+      {% for e in form.points.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label d-block">Current icon</label>
+      <img src="{{ icon_url }}" alt="icon" style="width:64px;height:64px;object-fit:contain" class="border p-1 rounded">
+      <div class="form-check mt-2">
+        {{ form.remove_icon(class="form-check-input", id="removeIcon") }}
+        <label for="removeIcon" class="form-check-label">Remove current icon</label>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Replace icon</label>
+      {{ form.icon(class="form-control") }}
+      <div class="form-text">PNG/JPG/WEBP. We resize to max 256×256.</div>
+      {% for e in form.icon.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <button class="btn btn-primary">Save changes</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('admin.award_list') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

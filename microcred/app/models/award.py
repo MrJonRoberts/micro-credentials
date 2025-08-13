@@ -1,10 +1,12 @@
 from ..extensions import db
+from ..routes.main import index
+
 
 class Award(db.Model):
     __tablename__ = "awards"
 
     id = db.Column(db.Integer, primary_key=True)
-    slug = db.Column(db.String(64), unique=True, nullable=False)  # stable id for URLs/API
+    slug = db.Column(db.String(64), unique=True, nullable=False, index=True)  # stable id for URLs/API
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=False)
     image_filename = db.Column(db.String(255), nullable=True)

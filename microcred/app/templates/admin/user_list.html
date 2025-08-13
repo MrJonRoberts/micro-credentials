@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Admin · Users{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3"><i class="fa-regular fa-user me-2"></i>Users</h1>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-6 col-md-4">
+    <input class="form-control" type="text" name="q" placeholder="Search name or email" value="{{ request.args.get('q','') }}">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary"><i class="fa-solid fa-magnifying-glass me-1"></i>Search</button>
+  </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Roles</th>
+      <th class="text-end">Achievements</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.full_name or "—" }}</td>
+      <td class="text-muted">{{ u.email }}</td>
+      <td>
+        {% for r in u.roles %}
+          <span class="badge text-bg-secondary">{{ r.name }}</span>
+        {% else %}
+          <span class="text-muted">none</span>
+        {% endfor %}
+      </td>
+      <td class="text-end">{{ u.achievements.count() }}</td>
+      <td class="text-end">
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.user_detail', user_id=u.id) }}">
+          <i class="fa-regular fa-pen-to-square me-1"></i>Manage
+        </a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

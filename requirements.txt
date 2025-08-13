@@ -15,3 +15,6 @@ python-dotenv==1.0.1
 
 # For generating slugs from award names
 python-slugify==8.0.4
+
+# for images
+Pillow

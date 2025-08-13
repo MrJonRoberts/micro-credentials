@@ -1,0 +1,135 @@
+<!-- microcred/app/templates/admin/award_form.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="h4 mb-3">Create Award</h1>
+
+  <form method="post" enctype="multipart/form-data" class="needs-validation">
+
+
+   {{ form.csrf_token() if form is defined }}
+  <div class="mb-3">
+    <label class="form-label">Name</label>
+    <input class="form-control" name="name" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Category</label>
+    <input class="form-control" name="category" placeholder="e.g. aussiesim" required>
+    <div class="form-text">This becomes the folder under /static/Icons/</div>
+  </div>
+
+    <div class="mb-3">
+      <label class="form-label">Icon (upload)</label>
+      {{ form.icon(class="form-control") }}
+      <div class="form-text">PNG/JPG/WEBP. We’ll resize to max 256×256.</div>
+      {% for e in form.icon.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <!-- NEW: Or choose from the library -->
+    <div class="mb-3">
+      <label class="form-label">Or choose from icon library</label>
+
+      <div class="d-flex align-items-center gap-2">
+        <img id="iconPreview"
+             src="{{ img_base }}/{{ request.form.get('icon_filename','default.png') }}"
+             style="width:48px;height:48px;object-fit:contain;border:1px solid #ddd;border-radius:.5rem"
+             alt="Icon preview">
+        <input type="text" class="form-control" name="icon_filename" id="iconFilename"
+       value="{{ icon_prefill or '' }}" placeholder=".../image.svg">
+        <!-- store the chosen icon path that the backend will save -->
+<!--        <input type="text"-->
+<!--               class="form-control"-->
+<!--               name="icon_filename"-->
+<!--               id="iconFilename"-->
+<!--               placeholder="/static/Icons/.../image.svg"-->
+<!--               value="{{ request.form.get('icon_filename','') }}"-->
+<!--               style="max-width: 420px;">-->
+
+        <button type="button"
+                class="btn btn-outline-secondary"
+                id="openIconPicker"
+                data-bs-toggle="popover"
+                data-bs-html="true"
+                title="Pick an icon">
+          Browse…
+        </button>
+      </div>
+
+      <div class="form-text">
+        You can either upload a file above, or select an existing icon. If both are provided, the upload wins.
+      </div>
+    </div>
+
+    <button class="btn btn-primary">Create</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('admin.dashboard') }}">Cancel</a>
+  </form>
+</div>
+
+<!-- Popover bootstrap initialiser + dynamic content loader -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('openIconPicker');
+  const input = document.querySelector('input[name="icon_filename"]'); // <— robust selector
+  const preview = document.getElementById('iconPreview');
+
+  // Bootstrap popover initialiser
+  const pop = new bootstrap.Popover(btn, {
+    content: '<div class="p-2">Loading…</div>',
+    trigger: 'click',
+    placement: 'auto',
+    container: 'body',
+    html: true,
+    sanitize: false
+  });
+
+  async function loadPicker(page = 1) {
+    const resp = await fetch('{{ url_for("icons.icon_picker") }}?per_page=60&page=' + page);
+    const html = await resp.text();
+    const body = document.querySelector('.popover .popover-body');
+    if (body) body.innerHTML = html;
+  }
+
+  // Load the grid when the popover opens
+  btn.addEventListener('shown.bs.popover', () => loadPicker(1));
+
+  // --- Event delegation for clicks inside the popover ---
+  document.body.addEventListener('click', (ev) => {
+    // Pick an icon
+    const pick = ev.target.closest('.icon-option');
+    if (pick) {
+      const url = pick.getAttribute('data-url') || '';
+      if (input) {
+        console.log(url);
+        input.value = url;              // write to form input
+        input.dispatchEvent(new Event('change', { bubbles: true })); // if you need reactive forms
+      }
+      if (preview && url) preview.src = url;  // live preview
+      // Hide the popover
+      const instance = bootstrap.Popover.getInstance(btn);
+      if (instance) instance.hide();
+    }
+
+    // Pager
+    const nav = ev.target.closest('.icon-nav');
+    if (nav) {
+      const body = document.querySelector('.popover .popover-body');
+      const currentPageText = body?.querySelector('.small')?.textContent || '';
+      const m = currentPageText.match(/Page\s+(\d+)\s*\/\s*(\d+)/i);
+      const currentPage = m ? parseInt(m[1], 10) : 1;
+      const dir = parseInt(nav.getAttribute('data-dir') || '0', 10);
+      const next = Math.max(1, currentPage + dir);
+      loadPicker(next);
+    }
+  });
+
+  // Keep preview in sync if user types manually
+  if (input) {
+    input.addEventListener('input', () => {
+      const v = input.value.trim();
+      if (v) preview.src = v;
+    });
+  }
+});
+</script>
+{% endblock %}

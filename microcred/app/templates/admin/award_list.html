@@ -1,0 +1,28 @@
+<!-- microcred/app/templates/admin/award_list.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="h4 mb-3">Awards</h1>
+  <table class="table align-middle">
+    <thead><tr><th>Icon</th><th>Name</th><th>Points</th><th>Slug</th><th></th></tr></thead>
+    <tbody>
+      {% for a in awards %}
+      <tr>
+        <td style="width:56px">
+          <img src="{{ img_base }}/{{ a.icon_filename or 'default.png' }}"
+               alt="{{ a.name }}" style="width:40px;height:40px;object-fit:contain">
+        </td>
+        <td>{{ a.name }}</td>
+        <td>{{ a.points }}</td>
+        <td><code>{{ a.slug }}</code></td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.award_edit', award_id=a.id) }}">
+            Edit
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

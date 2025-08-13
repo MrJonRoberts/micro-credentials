@@ -44,7 +44,7 @@
           <a class="fw-semibold link-underline link-underline-opacity-0" href="{{ url_for('participants.my_award_detail', slug=ach.award.slug) }}">
             {{ ach.award.name }}</a>
           <div class="small text-muted">
-            Issued {{ ach.issued_at.strftime('%-d %b %Y') if ach.issued_at else '' }}
+            Issued {{ ach.issued_at|date_short }}
             {% if ach.issued_by %} by {{ ach.issued_by.first_name }}{% endif %}
           </div>
         </div>

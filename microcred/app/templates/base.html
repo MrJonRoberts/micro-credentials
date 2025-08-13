@@ -10,14 +10,13 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
   <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet"
-        integrity="sha512-xh6O/CkQoY7QZ7bS3E5m0lkmVgqS6r3Z5b8sT1c5q6vQ3T+eCzq8m7c3yB2u3j2QYQwWc9Yx9f06xxZQW2f1g==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
-
+ <script src="https://kit.fontawesome.com/28009ce0ef.js" crossorigin="anonymous"></script>
   {% block head %}{% endblock %}
   <style>
     body { padding-top: 4.5rem; }
     .award-img { width: 40px; height: 40px; object-fit: cover; border-radius: .25rem; }
   </style>
+
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -26,19 +25,35 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+  {# --- Awards admin/issuer menu --- #}
 
     <div id="navbarsExample" class="collapse navbar-collapse">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item"><a class="nav-link" href="{{ url_for('participants.my_awards') }}"><i class="fa-solid fa-award me-1"></i>My awards</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('participants.achievable') }}"><i class="fa-regular fa-compass me-1"></i>Achievable</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('issuers.awardable_list') }}"><i class="fa-solid fa-hand-holding-heart me-1"></i>Issuer</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}"><i class="fa-solid fa-toolbox me-1"></i>Admin</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('issuers.awardable_list') }}"><i class="fa-solid fa-hand-holding-heart me-1"></i>Issuer</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('icons.index') }}"><i class="fa fa-image"></i> Icons</a></li>
+     {% if current_user.is_authenticated and has_role('admin', 'issuer') %}
+             <li class="nav-item"> <a class="nav-link" href="{{ url_for('admin.award_create') }}">
+               <i class="fa-regular fa-square-plus me-1"></i> Add award
+             </a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.award_list') }}">
+        <i class="fa-regular fa-pen-to-square me-1"></i>Manage awards
+        </a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.user_list') }}">
+    <i class="fa-regular fa-user me-1"></i>Users
+  </a></li>
+
+        {% endif %}
+
       </ul>
+
       <ul class="navbar-nav ms-auto">
         {% if current_user.is_authenticated %}
           <li class="nav-item">
             <span class="navbar-text me-3">
-<i class="fa-regular fa-user me-1"></i>{{ current_user.full_name or current_user.email }}
+            <i class="fa-regular fa-user me-1"></i>{{ current_user.full_name or current_user.email }}
             </span>
           </li>
           <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.logout') }}">Logout</a></li>
@@ -47,6 +62,7 @@
           <li class="nav-item"><a class="btn btn-warning btn-sm" href="{{ url_for('auth.register') }}">Register</a></li>
         {% endif %}
       </ul>
+
     </div>
   </div>
 </nav>
@@ -81,5 +97,6 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 {% block scripts %}{% endblock %}
+   <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
 </body>
 </html>

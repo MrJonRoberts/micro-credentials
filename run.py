@@ -17,6 +17,7 @@ def build_app():
     print(f"Instance path: {app.instance_path}")
     print(f"DB URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
 
+
     return app, env_name
 
 if __name__ == "__main__":
